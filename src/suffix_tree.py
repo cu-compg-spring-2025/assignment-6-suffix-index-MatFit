@@ -55,16 +55,46 @@ def add_suffix(nodes, suf):
 def build_suffix_tree(text):
     text += "$"
 
-    nodes = [ ['', {}] ]
+    root = [ ['', {}] ]
 
     for i in range(len(text)):
-        add_suffix(nodes, text[i:])
+        add_suffix(root, text[i:]) # adding suffix text[i:] into root
     
-    return nodes
+    return root
 
 def search_tree(suffix_tree, P):
     # Your code here
-    return None
+
+    n = 0
+    match_len = 0
+    i = 0
+    
+    while i < len(P):
+        if not suffix_tree[n][CHILDREN]:
+            break
+            
+        char = P[i]
+        
+        if char not in suffix_tree[n][CHILDREN]:
+            break
+        
+        child_node = suffix_tree[n][CHILDREN][char]
+        substring = suffix_tree[child_node][SUB]
+        
+        j = 0
+        while j < len(substring) and i + j < len(P) and P[i + j] == substring[j]:
+            j += 1
+        
+        match_len += j
+        i += j
+        
+        if j == len(substring):
+            n = child_node
+        else:
+            break
+    
+    return match_len
+
 
 def main():
     args = get_args()
@@ -77,11 +107,14 @@ def main():
         reference = utils.read_fasta(args.reference)
         T = reference[0][1]
 
+
+    print(T)
     tree = build_suffix_tree(T)
-        
+    
+
     if args.query:
         for query in args.query:
-            match_len = search_tree(tree, query)
+            match_len = search_tree(tree, query) # Will adjust to test time
             print(f'{query} : {match_len}')
 
 if __name__ == '__main__':
